@@ -1,0 +1,54 @@
+# Nota: se eliminó la clave "version" para evitar la advertencia
+services:
+  # --- Base de datos SQL Server ---
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql
+    restart: always
+    environment:
+      SA_PASSWORD: "Unibol2025*"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data1:/var/opt/mssql
+
+  # --- API NestJS ---
+  nest-app:
+    build: ./backend-music-portal
+    container_name: nest-app
+    depends_on:
+      - mssql
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend-music-portal:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=sqlserver://mssql:1433;database=music-portal-db;user=sa;password=Unibol2025*;trustServerCertificate=true
+      - PORT=3000
+      - SECRETKEY=Pudin
+      - PATH_FILES=./
+    command: npm run start:dev
+
+  # --- Frontend Vite ---
+  vite-app:
+    build: ./music-portal
+    container_name: vite-app
+    
+    depends_on:
+      - nest-app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./music-portal:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://nest-app:3000
+    command: npm run dev -- --host
+
+volumes:
+  mssql-data1:
