@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateSongDto } from './dto/create-song.dto';
 import { PrismaClient } from '@prisma/client';
-import { existsSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 // import { envs } from 'src/config';
 import * as musicMetadata from 'music-metadata';
@@ -95,7 +95,15 @@ export class MusicService extends PrismaClient implements OnModuleInit {
 
       if (pictures && pictures.length > 0) {
         const picture = pictures[0];
-        const imagePath = `./uploads/imgs/${nameFileNotExtension}.jpg`;
+        // const imagePath = `./uploads/imgs/${nameFileNotExtension}.jpg`;
+        // Creamos dentro de /App/uploads la carpeta imgs si no existe
+        const imgsDir = join(__dirname, '..', '..', 'uploads', 'imgs');
+        console.log(imgsDir);
+        if (!existsSync(imgsDir)) {
+          mkdirSync(imgsDir, { recursive: true });
+        }
+
+        const imagePath = join(__dirname, '..', '..', 'uploads', 'imgs', `${nameFileNotExtension}.jpg`);
         writeFileSync(imagePath, new Uint8Array(picture.data));
         return {
           imagePath,
@@ -150,8 +158,14 @@ export class MusicService extends PrismaClient implements OnModuleInit {
         throw new BadRequestException('No se ha encontrado la canción');
       }
 
-      const path = join(__dirname, '..', '..', 'uploads', 'imgs', song.pathImage);
+      //Creamos la carpeta imgs si no existe dentro de uploads
+      const imgsDir = join(__dirname, '..', '..', 'uploads', 'imgs');
+      console.log(imgsDir);
+      if (!existsSync(imgsDir)) {
+        mkdirSync(imgsDir, { recursive: true });
+      }
 
+      const path = join(__dirname, '..', '..', 'uploads', 'imgs', song.pathImage )
       if (!existsSync(path)) {
         throw new BadRequestException('No se ha encontrado el archivo de la canción');
       }

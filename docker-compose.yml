@@ -1,37 +1,66 @@
 # Nota: se eliminó la clave "version" para evitar la advertencia
 services:
   # --- Base de datos SQL Server ---
-  mssql:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: mssql
+  # mssql:
+  #   image: mcr.microsoft.com/mssql/server:2019-latest
+  #   container_name: mssql
+  #   restart: always
+  #   environment:
+  #     SA_PASSWORD: "Unibol2025*"
+  #     ACCEPT_EULA: "Y"
+  #     MSSQL_PID: "Developer"
+  #   ports:
+  #     - "1433:1433"
+  #   volumes:
+  #     - mssql-data1:/var/opt/mssql
+
+  mariadb:
+    image: mariadb:11.1
+    container_name: mariadb_music_portal
     restart: always
     environment:
-      SA_PASSWORD: "Unibol2025*"
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: "Developer"
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: music-portal-db
     ports:
-      - "1433:1433"
+      - "3306:3306"
     volumes:
-      - mssql-data1:/var/opt/mssql
+      - mariadb_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_music_portal
+    restart: always
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    ports:
+      - "8080:80"
+    depends_on:
+      - mariadb
+
 
   # --- API NestJS ---
   nest-app:
     build: ./backend-music-portal
     container_name: nest-app
     depends_on:
-      - mssql
+      - mariadb
     ports:
       - "3000:3000"
-    volumes:
-      - ./backend-music-portal:/app
-      - /app/node_modules
+    # volumes:
+    #   - ./backend-music-portal:/app
+    #   - /app/node_modules
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=sqlserver://mssql:1433;database=music-portal-db;user=sa;password=Unibol2025*;trustServerCertificate=true
+      - DATABASE_URL=mysql://root:rootpassword@mariadb:3306/music-portal-db
       - PORT=3000
       - SECRETKEY=Pudin
       - PATH_FILES=./
-    command: npm run start:dev
+    # command: npm run start:dev
+    # Volumen en la carpeta /app/uploads del contenedor nest-app
+    volumes:
+      - ./backend-music-portal/uploads:/app/uploads
 
   # --- Frontend Vite ---
   vite-app:
@@ -51,4 +80,6 @@ services:
     command: npm run dev -- --host
 
 volumes:
-  mssql-data1:
+  mariadb_data:
+
+    
