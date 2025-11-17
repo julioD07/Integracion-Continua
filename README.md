@@ -10,11 +10,12 @@ El objetivo de este README es ofrecer los pasos mínimos para levantar el entorn
 ## Requisitos previos
 
 - Docker y Docker Compose instalados en el equipo.
-- (Opcional) SQL Server Management Studio si quieres crear la base de datos manualmente.
+- (Opcional) phpMyAdmin para administrar la base de datos desde el navegador.
 
 ## Servicios definidos en `docker-compose.yml`
 
-- `mssql` — Microsoft SQL Server (puerto 1433:1433)
+- `mariadb` — MariaDB (puerto 3306:3306)
+- `phpmyadmin` — phpMyAdmin para administración web (puerto 8080:80)
 - `nest-app` — API backend (puerto 3000:3000)
 - `vite-app` — Frontend Vite (puerto 5173:5173)
 
@@ -22,7 +23,8 @@ Los puertos expuestos localmente:
 
 - API: http://localhost:3000
 - Frontend Vite: http://localhost:5173
-- SQL Server: localhost, puerto 1433
+- MariaDB: localhost, puerto 3306
+- phpMyAdmin: http://localhost:8080
 
 El fichero `docker-compose.yml` en la raíz configura las variables de entorno necesarias (por ejemplo, `DATABASE_URL`) y monta los proyectos en los contenedores para desarrollo.
 
@@ -58,31 +60,20 @@ docker compose down
 docker compose ps
 ```
 
-## Base de datos: crear `music-portal-db`
+## Base de datos: MariaDB
 
-La aplicación usa una base de datos llamada `music-portal-db`. Debes crearla en SQL Server antes de ejecutar el seed. Pasos rápidos con SQL Server Management Studio (SSMS):
-
-1. Abre SSMS y conéctate a `localhost,1433`.
-2. Usa el usuario `sa` y la contraseña definida en el `docker-compose.yml` (si estás usando el `docker-compose.yml` provisto, la contraseña está allí).
-3. Crea una nueva base de datos y nómbrala `music-portal-db`.
-
-Nota: si prefieres, puedes crear la base de datos ejecutando una consulta T-SQL como:
-
-```sql
-CREATE DATABASE [music-portal-db];
-GO
-```
+La base de datos `music-portal-db` se crea automáticamente al levantar el contenedor de MariaDB. Puedes gestionarla desde phpMyAdmin en [http://localhost:8080](http://localhost:8080) usando usuario `root` y contraseña `rootpassword`.
 
 ## Variables de entorno
 
 El backend contiene un `.env` en `backend-music-portal/.env` con la cadena `DATABASE_URL`. Asegúrate de revisarlo si necesitas modificar credenciales o la cadena de conexión.
 
-Ejemplo (ya provisto en el proyecto):
+Ejemplo actualizado:
 
 ```
-DATABASE_URL="sqlserver://mssql:1433;database=music-portal-db;user=sa;password=...;trustServerCertificate=true"
+DATABASE_URL="mysql://root:rootpassword@mariadb:3306/music-portal-db"
 PORT=3000
-SECRETKEY=...
+SECRETKEY=Pudin
 PATH_FILES="./"
 ```
 
@@ -110,9 +101,9 @@ Después de ejecutar la ruta del seed deberías ver en la respuesta (y en la bas
 
 ## Problemas frecuentes y soluciones
 
-- El contenedor de SQL Server tarda un poco en arrancar. Si la API falla por conexión a la BD, espera 20-30s y vuelve a intentarlo o revisa logs (`docker compose logs -f mssql`).
+- El contenedor de MariaDB puede tardar unos segundos en estar disponible. Si la API falla por conexión a la BD, espera 20-30s y vuelve a intentarlo o revisa logs (`docker compose logs -f mariadb`).
 - Si el seed falla por tablas inexistentes, revisa que hayas ejecutado las migraciones de Prisma (dependiendo del flujo del proyecto). En este setup las migraciones pueden aplicarse automáticamente desde el backend si está configurado.
-- Si el puerto 1433 está ocupado localmente, detén el servicio de SQL Server local o ajusta el puerto en el `docker-compose.yml`.
+- Si el puerto 3306 está ocupado localmente, detén el servicio de MariaDB local o ajusta el puerto en el `docker-compose.yml`.
 
 ## Cómo detener todo
 
@@ -122,7 +113,7 @@ docker compose down
 
 ## Contacto y notas finales
 
-Este README cubre el flujo de desarrollo mínimo con Docker Compose: levantar servicios, crear la base de datos `music-portal-db` y ejecutar el seed mediante la ruta proporcionada. Si quieres que añada instrucciones para ejecutar migraciones Prisma manuales, crear usuarios con datos específicos o ejemplos de variables de entorno para producción, dímelo y lo añado.
+Este README cubre el flujo de desarrollo mínimo con Docker Compose: levantar servicios, crear la base de datos `music-portal-db` (ahora con MariaDB) y ejecutar el seed mediante la ruta proporcionada. Si quieres que añada instrucciones para ejecutar migraciones Prisma manuales, crear usuarios con datos específicos o ejemplos de variables de entorno para producción, dímelo y lo añado.
 
 ---
 
