@@ -1,5 +1,8 @@
+
+import { FaHome, FaSignOutAlt } from "react-icons/fa";
 import { BsFileEarmarkMusicFill } from "react-icons/bs";
-import { FaCog, FaHome, FaSignOutAlt, FaUser } from "react-icons/fa";
+
+
 
 
 export const itemsSidebarData = [
