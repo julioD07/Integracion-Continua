@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     stages {
 
         stage('Checkout') {
@@ -11,6 +11,9 @@ pipeline {
         }
 
         stage('Backend - Install dependencies') {
+            agent {
+                docker { image 'node:25.2' }
+            }
             steps {
                 echo "Instalando dependencias del backend..."
                 dir('backend-music-portal') {
@@ -20,6 +23,9 @@ pipeline {
         }
 
         stage('Backend - Build') {
+            agent {
+                docker { image 'node:25.2' }
+            }
             steps {
                 echo "Construyendo backend..."
                 dir('backend-music-portal') {
@@ -29,6 +35,9 @@ pipeline {
         }
 
         stage('Frontend - Install dependencies') {
+            agent {
+                docker { image 'node:25.2' }
+            }
             steps {
                 echo "Instalando dependencias del frontend..."
                 dir('music-portal') {
@@ -38,6 +47,9 @@ pipeline {
         }
 
         stage('Frontend - Build') {
+            agent {
+                docker { image 'node:25.2' }
+            }
             steps {
                 echo "Construyendo frontend..."
                 dir('music-portal') {
