@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        NODE_IMAGE = 'node:25.2'
-    }
-
     stages {
 
         stage('Checkout') {
@@ -16,7 +12,10 @@ pipeline {
 
         stage('Backend - Install & Build') {
             agent {
-                docker { image "${env.NODE_IMAGE}" args "-u root:root" }
+                docker { 
+                    image 'node:25.2' 
+                    args '-u root:root'
+                }
             }
             steps {
                 echo "Instalando dependencias y construyendo backend..."
@@ -29,7 +28,10 @@ pipeline {
 
         stage('Frontend - Install & Build') {
             agent {
-                docker { image "${env.NODE_IMAGE}" args "-u root:root" }
+                docker { 
+                    image 'node:25.2' 
+                    args '-u root:root'
+                }
             }
             steps {
                 echo "Instalando dependencias y construyendo frontend..."
