@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        NODE_IMAGE = 'node:25.2'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -10,57 +14,35 @@ pipeline {
             }
         }
 
-        stage('Backend - Install dependencies') {
+        stage('Backend - Install & Build') {
             agent {
-                docker { image 'node:25.2' }
+                docker { image "${env.NODE_IMAGE}" args "-u root:root" }
             }
             steps {
-                echo "Instalando dependencias del backend..."
+                echo "Instalando dependencias y construyendo backend..."
                 dir('backend-music-portal') {
                     sh 'npm install'
-                }
-            }
-        }
-
-        stage('Backend - Build') {
-            agent {
-                docker { image 'node:25.2' }
-            }
-            steps {
-                echo "Construyendo backend..."
-                dir('backend-music-portal') {
                     sh 'npm run build'
                 }
             }
         }
 
-        stage('Frontend - Install dependencies') {
+        stage('Frontend - Install & Build') {
             agent {
-                docker { image 'node:25.2' }
+                docker { image "${env.NODE_IMAGE}" args "-u root:root" }
             }
             steps {
-                echo "Instalando dependencias del frontend..."
+                echo "Instalando dependencias y construyendo frontend..."
                 dir('music-portal') {
                     sh 'npm install'
-                }
-            }
-        }
-
-        stage('Frontend - Build') {
-            agent {
-                docker { image 'node:25.2' }
-            }
-            steps {
-                echo "Construyendo frontend..."
-                dir('music-portal') {
                     sh 'npm run build'
                 }
             }
         }
 
-        stage('Confirmacion') {
+        stage('Confirmación') {
             steps {
-                echo "CI ejecutado exitosamente."
+                echo "✅ CI ejecutado exitosamente."
             }
         }
     }
@@ -70,7 +52,7 @@ pipeline {
             echo "❌ El pipeline falló."
         }
         success {
-            echo "✅ Pipeline ejecutado correctamente."
+            echo "✅ Pipeline completado correctamente."
         }
     }
 }
